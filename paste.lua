@@ -1,3 +1,4 @@
+print("new")
 local workspace = cloneref(game:GetService("Workspace"))
 local run = cloneref(game:GetService("RunService"))
 local http_service = cloneref(game:GetService("HttpService"))
