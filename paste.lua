@@ -1,4 +1,3 @@
-print("RIP")
 local workspace = cloneref(game:GetService("Workspace"))
 local run = cloneref(game:GetService("RunService"))
 local http_service = cloneref(game:GetService("HttpService"))
@@ -495,12 +494,19 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 
                     local selected_layout = objects[ player.Name ]
                     local humanoid = data.info.humanoid
-                    
-                    local multiplier = value / humanoid.MaxHealth
-                    local color = flags[ "Health_Low" ].Color:Lerp( flags["Health_High"].Color, multiplier )
-                    
+                    if not humanoid then return end
+
+                    local maxH = humanoid.MaxHealth or 1
+                    local multiplier = (maxH > 0) and (value / maxH) or 0
+                    multiplier = math.clamp(multiplier, 0, 1)
+
                     objects[ "healthbar" ].Size = UDim2.new(1, -2, multiplier, -2)
                     objects[ "healthbar" ].Position = UDim2.new(0, 1, 1 - multiplier, 1)
+
+                    local low = flags[ "Health_Low" ] and flags[ "Health_Low" ].Color or Color3.new(1, 0, 0)
+                    local high = flags[ "Health_High" ] and flags[ "Health_High" ].Color or Color3.new(0, 1, 0)
+                    local color = low:Lerp(high, multiplier)
+
                     objects[ "healthbar" ].BackgroundColor3 = color
                 end
 
@@ -630,7 +636,10 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                 local humanoid = path.info and path.info.humanoid
                 if humanoid and humanoid.Health and objects["healthbar"] then
                     local mult = humanoid.MaxHealth > 0 and (humanoid.Health / humanoid.MaxHealth) or 0
-                    local color = flags["Health_Low"].Color:Lerp(flags["Health_High"].Color, mult)
+                    mult = math.clamp(mult, 0, 1)
+                    local low = flags["Health_Low"] and flags["Health_Low"].Color or Color3.new(1,0,0)
+                    local high = flags["Health_High"] and flags["Health_High"].Color or Color3.new(0,1,0)
+                    local color = low:Lerp(high, mult)
                     objects["healthbar"].BackgroundColor3 = color
                 end
                 print("6")
@@ -721,6 +730,16 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                 local distance_label = objects[ "distance" ]
                 if distance_label.Text ~= tostring( math.round(distance) )  .. "st" then 
                     distance_label.Text = tostring( math.round(distance) ) .. "st"
+                end
+
+                -- ensure healthbar color updates smoothly each frame
+                if flags["Healthbar"] and objects["healthbar"] and data.info and data.info.humanoid then
+                    local h = data.info.humanoid
+                    local mult = h.MaxHealth > 0 and (h.Health / h.MaxHealth) or 0
+                    mult = math.clamp(mult, 0, 1)
+                    local low = flags["Health_Low"] and flags["Health_Low"].Color or Color3.new(1,0,0)
+                    local high = flags["Health_High"] and flags["Health_High"].Color or Color3.new(0,1,0)
+                    objects["healthbar"].BackgroundColor3 = low:Lerp(high, mult)
                 end 
 
             end
