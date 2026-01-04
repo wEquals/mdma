@@ -1,4 +1,4 @@
-print("new")
+print("really new")
 local workspace = cloneref(game:GetService("Workspace"))
 local run = cloneref(game:GetService("RunService"))
 local http_service = cloneref(game:GetService("HttpService"))
@@ -59,6 +59,21 @@ local flags = { -- basically a substitute for ur ui flags (flags["wahdiuawdhwa"]
 
 -- expose flags to global environment so external UIs can modify them
 pcall(function() getgenv().esp_flags = flags end)
+
+-- make flag accesses reflect getgenv().esp_flags dynamically and sync writes
+local _flags_backup = flags
+setmetatable(flags, {
+    __index = function(_, k)
+        local gf = getgenv().esp_flags
+        if gf and gf[k] ~= nil then return gf[k] end
+        return _flags_backup[k]
+    end,
+    __newindex = function(_, k, v)
+        _flags_backup[k] = v
+        if not getgenv().esp_flags then getgenv().esp_flags = {} end
+        getgenv().esp_flags[k] = v
+    end
+})
 
 local fonts = {}; do
     function Register_Font(Name, Weight, Style, Asset)
@@ -581,6 +596,7 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                 end
                 print("3")
                 objects.holder.Parent = flags["Enabled"] and esp.screengui or esp.cache
+                objects.holder.Visible = flags["Enabled"]
 
                 objects[ "name" ].Parent = flags["Names"] and objects["holder"] or esp.cache
                 objects[ "name" ].TextColor3 = flags["Name_Color"].Color
@@ -739,3 +755,6 @@ pcall(function() getgenv().esp_flags = flags end)
 
 task.wait()
 esp.refresh_elements()
+
+-- expose esp object so external UIs can call refresh or other helpers
+pcall(function() getgenv().esp = esp end)
