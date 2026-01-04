@@ -1,4 +1,4 @@
-print("really new")
+print("RIP")
 local workspace = cloneref(game:GetService("Workspace"))
 local run = cloneref(game:GetService("RunService"))
 local http_service = cloneref(game:GetService("HttpService"))
@@ -42,19 +42,19 @@ local bones = {
 local flags = { -- basically a substitute for ur ui flags (flags["wahdiuawdhwa"])
     ["Enabled"] = true;
     ["Names"] = true; 
-    ["Name_Color"] = { Color = rgb(0, 255, 255) };
+    ["Name_Color"] = { Color = rgb(255, 255, 255) };
     ["Boxes"] = true;
     ["Box_Type"] = "Corner";
-    ["Box_Color"] = { Color = rgb(0, 255, 0) };
+    ["Box_Color"] = { Color = rgb(255, 255, 255) };
     ["Healthbar"] = true; 
     ["Health_High"] = { Color = rgb(0, 255, 0) };
     ["Health_Low"] = { Color = rgb(255, 0, 0) };
     ["Distance"] = true;
     ["Weapon"] = true;
     ["Skeletons"] = true;
-    ["Skeletons_Color"] = { Color = rgb(16, 0, 247) };
-    ["Distance_Color"] = { Color = rgb(0, 255, 0) };
-    ["Weapon_Color"] = { Color = rgb(0, 255, 255) }
+    ["Skeletons_Color"] = { Color = rgb(255, 255, 255) };
+    ["Distance_Color"] = { Color = rgb(255, 255, 255) };
+    ["Weapon_Color"] = { Color = rgb(255, 255, 255) }
 }
 
 -- expose flags to global environment so external UIs can modify them
@@ -626,6 +626,13 @@ local esp = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
                 end
 
                 objects[ "healthbar_holder" ].Parent = flags[ "Healthbar" ] and objects[ "holder" ] or esp.cache
+                -- update current healthbar color based on humanoid health
+                local humanoid = path.info and path.info.humanoid
+                if humanoid and humanoid.Health and objects["healthbar"] then
+                    local mult = humanoid.MaxHealth > 0 and (humanoid.Health / humanoid.MaxHealth) or 0
+                    local color = flags["Health_Low"].Color:Lerp(flags["Health_High"].Color, mult)
+                    objects["healthbar"].BackgroundColor3 = color
+                end
                 print("6")
                 objects[ "weapon" ].TextColor3 = flags["Weapon_Color"].Color
                 objects[ "weapon" ].Parent = flags["Weapon"] and v.Character:FindFirstChildOfClass("Tool") and objects[ "holder" ] or esp.cache
